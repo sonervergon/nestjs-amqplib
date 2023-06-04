@@ -1,0 +1,2 @@
+export const AMQP_CLIENT = "AMQP_CLIENT";
+export const AMQP_MODULE_OPTIONS = "AMQP_MODULE_OPTIONS";
