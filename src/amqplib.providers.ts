@@ -1,5 +1,5 @@
 import * as amqplib from "amqplib";
-import { Provider } from "@nestjs/common";
+import { Logger, Provider } from "@nestjs/common";
 import { AmqpOptions, AsyncAmqpOptions } from "./amqplib.interface";
 import { AMQP_CLIENT, AMQP_MODULE_OPTIONS } from "./amqplib.constants";
 
@@ -10,25 +10,25 @@ export const createConnection = async (
   return await amqplib.connect(connectionOptions, socketOptions);
 };
 
-export const createAmqpProvider = (
-  onConnect: () => void,
-  onError: (error: any) => void
-): Provider<amqplib.Connection> => {
+export const createAmqpProvider = (): Provider<amqplib.Connection> => {
   return {
     provide: AMQP_CLIENT,
-    useFactory: async (options: AmqpOptions): Promise<amqplib.Connection> => {
+    useFactory: async (
+      logger: Logger,
+      options: AmqpOptions
+    ): Promise<amqplib.Connection> => {
       try {
         const connection = await createConnection(
           options.connectionOptions,
           options.socketOptions
         );
-        onConnect();
+        logger.log("Connected to queue");
         return connection;
       } catch (error) {
-        onError(error);
+        logger.error(error);
       }
     },
-    inject: [AMQP_MODULE_OPTIONS],
+    inject: [Logger, AMQP_MODULE_OPTIONS],
   };
 };
 

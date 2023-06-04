@@ -3,6 +3,10 @@
   "version": "0.0.1",
   "packageManager": "yarn@3.6.0",
   "module": "commonjs",
+  "scripts": {
+    "build": "rimraf dist && tsc -p tsconfig.json"
+  },
+  "main": "dist/index.js",
   "dependencies": {
     "@nestjs/common": "^9",
     "@nestjs/core": "^9",
@@ -12,6 +16,7 @@
   "devDependencies": {
     "@nestjs/common": "^9.4.2",
     "@types/amqplib": "^0.10.1",
+    "rimraf": "^5.0.1",
     "typescript": "^5.1.3"
   }
 }

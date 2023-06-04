@@ -6,44 +6,33 @@ import {
   Module,
   Logger,
   OnModuleDestroy,
+  OnApplicationBootstrap,
 } from "@nestjs/common";
-import { AmqpOptions, AsyncAmqpOptions } from "amqplib.interface";
+import { AsyncAmqpOptions } from "./amqplib.interface";
 import {
   createAmqpProvider,
   createAsyncClientOptions,
-} from "amqplib.providers";
-import { AMQP_CLIENT, AMQP_MODULE_OPTIONS } from "amqplib.constants";
+} from "./amqplib.providers";
+import { AMQP_CLIENT } from "./amqplib.constants";
 
 @Global()
 @Module({
   imports: [DiscoveryModule],
+  providers: [Logger],
 })
-export class AmqplibModule implements OnModuleDestroy {
+export class AmqplibModule implements OnModuleDestroy, OnApplicationBootstrap {
   constructor(private readonly moduleRef: ModuleRef) {}
-  logger = new Logger(AmqplibModule.name);
-  private onConnect = () => this.logger.log("Connected to queue");
-  private onError = (error: any) => this.logger.error(error);
 
-  register(options: AmqpOptions): DynamicModule {
-    return {
-      module: AmqplibModule,
-      providers: [
-        createAmqpProvider(this.onConnect, this.onError),
-        { provide: AMQP_MODULE_OPTIONS, useValue: options },
-      ],
-    };
-  }
-  forRootAsync(options: AsyncAmqpOptions): DynamicModule {
+  static forRootAsync(options: AsyncAmqpOptions): DynamicModule {
     return {
       module: AmqplibModule,
       imports: options.imports,
-      providers: [
-        createAmqpProvider(this.onConnect, this.onError),
-        createAsyncClientOptions(options),
-      ],
+      providers: [createAmqpProvider(), createAsyncClientOptions(options)],
       exports: [],
     };
   }
+
+  onApplicationBootstrap() {}
 
   async onModuleDestroy() {
     const connection = this.moduleRef.get<Connection>(AMQP_CLIENT);
