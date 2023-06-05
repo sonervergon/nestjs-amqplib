@@ -8,6 +8,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 var AmqplibModule_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AmqplibModule = void 0;
@@ -16,20 +19,50 @@ const common_1 = require("@nestjs/common");
 const amqplib_providers_1 = require("./amqplib.providers");
 const amqplib_constants_1 = require("./amqplib.constants");
 let AmqplibModule = exports.AmqplibModule = AmqplibModule_1 = class AmqplibModule {
-    constructor(moduleRef) {
+    constructor(moduleRef, connection) {
         this.moduleRef = moduleRef;
+        this.connection = connection;
     }
-    static forRootAsync(options) {
+    static forRootAsync({ name, ...options }) {
+        const connectionName = (0, amqplib_constants_1.createAmqpConnectionName)(name);
         return {
             module: AmqplibModule_1,
             imports: options.imports,
-            providers: [(0, amqplib_providers_1.createAmqpProvider)(), (0, amqplib_providers_1.createAsyncClientOptions)(options)],
+            providers: [
+                {
+                    provide: connectionName,
+                    useFactory: amqplib_providers_1.factory,
+                    inject: [common_1.Logger, amqplib_constants_1.AMQP_MODULE_OPTIONS],
+                },
+                {
+                    provide: amqplib_constants_1.AMQP_MODULE_OPTIONS,
+                    useFactory: options.useFactory,
+                    inject: options.inject,
+                },
+                { provide: amqplib_constants_1.AMQP_CONNECTION, useValue: connectionName },
+            ],
             exports: [],
         };
     }
-    onApplicationBootstrap() { }
+    static forRoot({ name, ...options }) {
+        const connectionName = (0, amqplib_constants_1.createAmqpConnectionName)(name);
+        return {
+            module: AmqplibModule_1,
+            providers: [
+                {
+                    provide: connectionName,
+                    useFactory: (logger) => (0, amqplib_providers_1.factory)(logger, options),
+                    inject: [common_1.Logger],
+                },
+                { provide: amqplib_constants_1.AMQP_CONNECTION, useValue: connectionName },
+            ],
+        };
+    }
+    onApplicationBootstrap() {
+        console.log(this.connection);
+    }
     async onModuleDestroy() {
-        const connection = this.moduleRef.get(amqplib_constants_1.AMQP_CLIENT);
+        const connection = this.moduleRef.get(amqplib_constants_1.AMQP_CONNECTION);
         await connection.close();
     }
 };
@@ -39,6 +72,7 @@ exports.AmqplibModule = AmqplibModule = AmqplibModule_1 = __decorate([
         imports: [core_1.DiscoveryModule],
         providers: [common_1.Logger],
     }),
-    __metadata("design:paramtypes", [core_1.ModuleRef])
+    __param(1, (0, common_1.Inject)(amqplib_constants_1.AMQP_CONNECTION)),
+    __metadata("design:paramtypes", [core_1.ModuleRef, String])
 ], AmqplibModule);
 //# sourceMappingURL=amqplib.module.js.map

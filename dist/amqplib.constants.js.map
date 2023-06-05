@@ -1,1 +1,1 @@
-{"version":3,"file":"amqplib.constants.js","sourceRoot":"","sources":["../src/amqplib.constants.ts"],"names":[],"mappings":";;;AAAa,QAAA,WAAW,GAAG,aAAa,CAAC;AAC5B,QAAA,mBAAmB,GAAG,qBAAqB,CAAC"}
+{"version":3,"file":"amqplib.constants.js","sourceRoot":"","sources":["../src/amqplib.constants.ts"],"names":[],"mappings":";;;AAAa,QAAA,eAAe,GAAG,iBAAiB,CAAC;AAC1C,MAAM,wBAAwB,GAAG,CAAC,IAAY,EAAE,EAAE,CACvD,mBAAmB,IAAI,EAAE,CAAC;AADf,QAAA,wBAAwB,4BACT;AACf,QAAA,mBAAmB,GAAG,qBAAqB,CAAC"}
